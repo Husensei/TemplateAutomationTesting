@@ -10,10 +10,48 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
+    // ✅ Use BOM to align JUnit Platform modules
+    testImplementation platform('org.junit:junit-bom:5.12.1')
+
+    // JUnit Jupiter
     testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // JUnit Platform
+    testImplementation 'org.junit.platform:junit-platform-suite'
+    testImplementation 'org.junit.platform:junit-platform-launcher'
+
+    // JUnit Vintage
+    testImplementation 'org.junit.vintage:junit-vintage-engine'
+
+    // Cucumber JUnit 5 support
+    testImplementation 'io.cucumber:cucumber-java:7.21.1'
+    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.21.1'
+
+    // Selenium
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.31.0'
+
+    // WebDriverManager
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.3'
+
+    // REST Assured & JSON
+    testImplementation 'io.rest-assured:rest-assured:5.5.1'
+    testImplementation 'io.rest-assured:json-path:5.5.1'
+    implementation 'org.json:json:20250107'
+
+    // Logging
+    testImplementation 'org.slf4j:slf4j-simple:2.0.17'
 }
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
 }

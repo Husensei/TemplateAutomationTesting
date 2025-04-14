@@ -1,3 +1,5 @@
+package steps;
+
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -39,6 +41,8 @@ public class Hooks {
             } catch (IOException e) {
                 System.out.println("Error capturing screenshot: " + e.getMessage());
             } finally {
+                System.out.println("Name   : " + scenario.getName());
+                System.out.println("Status : " + scenario.getStatus());
                 System.out.println("Quitting WebDriver...");
                 quitDriver();
             }
