@@ -48,6 +48,8 @@ test {
         events "passed", "skipped", "failed"
     }
     systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
+    systemProperty "headless", System.getProperty("headless", "false")
+    systemProperty "browser", System.getProperty("browser", "chrome")
 }
 
 configurations {

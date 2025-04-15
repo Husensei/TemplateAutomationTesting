@@ -18,6 +18,7 @@ public class Hooks {
     @Before
     public void setUp() {
         System.out.println("Starting WebDriver...");
+        System.out.println(">>> Running tests using browser: " + System.getProperty("browser"));
         startDriver();
     }
 
@@ -41,8 +42,6 @@ public class Hooks {
             } catch (IOException e) {
                 System.out.println("Error capturing screenshot: " + e.getMessage());
             } finally {
-                System.out.println("Name   : " + scenario.getName());
-                System.out.println("Status : " + scenario.getStatus());
                 System.out.println("Quitting WebDriver...");
                 quitDriver();
             }
