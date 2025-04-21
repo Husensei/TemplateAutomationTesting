@@ -48,12 +48,17 @@ test {
         events "passed", "skipped", "failed"
     }
     systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
-    systemProperty "headless", System.getProperty("headless", "false")
     systemProperty "browser", System.getProperty("browser", "chrome")
+    systemProperty "headless", System.getProperty("headless", "false")
+    systemProperty "remote", System.getProperty("remote", "false")
 }
 
 configurations {
     cucumberRuntime {
         extendsFrom testImplementation
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:deprecation"
 }

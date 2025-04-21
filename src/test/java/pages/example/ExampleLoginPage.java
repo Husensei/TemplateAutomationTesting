@@ -6,6 +6,8 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import utils.SeleniumUtils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ExampleLoginPage {
 
     @FindBy(id = "username")
