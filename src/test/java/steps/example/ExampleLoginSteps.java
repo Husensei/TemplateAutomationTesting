@@ -7,6 +7,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import pages.example.ExampleLoginPage;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class ExampleLoginSteps {
 
     ExampleLoginPage exampleLoginPage;
@@ -33,7 +35,7 @@ public class ExampleLoginSteps {
 
     @Then("the user should be redirected to the secure area")
     public void theUserShouldBeRedirectedToTheSecureArea() {
-        exampleLoginPage.isSecureAreaVisible();
+        assertTrue(exampleLoginPage.isSecureAreaVisible(), "Secure area is not visible!");
     }
 
     @When("the user enters incorrect username and password")
@@ -43,7 +45,7 @@ public class ExampleLoginSteps {
     }
 
     @Then("the user should see the error message")
-    public void theUserShouldSeeTheErrorMessage() throws InterruptedException {
-        exampleLoginPage.isNotSecureAreVisible();
+    public void theUserShouldSeeTheErrorMessage() {
+        assertTrue(exampleLoginPage.isErrorMessageVisible(), "Error message is not visible!");
     }
 }

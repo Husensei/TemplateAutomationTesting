@@ -4,7 +4,11 @@ import driver.DriverFactory;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.SeleniumUtils;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -51,8 +55,9 @@ public class ExampleLoginPage {
         return successMessage.isDisplayed();
     }
 
-    public boolean isNotSecureAreVisible() throws InterruptedException {
-        Thread.sleep(2000);
+    public boolean isErrorMessageVisible() {
+        WebDriverWait wait = new WebDriverWait(DriverFactory.getDriver(), Duration.ofSeconds(5));
+        wait.until(ExpectedConditions.visibilityOf(errorMessage));
         return errorMessage.isDisplayed();
     }
 }

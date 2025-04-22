@@ -42,27 +42,6 @@ public class DriverFactory {
         }
     }
 
-    protected URL startStandaloneGrid() {
-        int port = PortProber.findFreePort();
-        try {
-            Main.main(
-                    new String[] {
-                            "standalone",
-                            "--port",
-                            String.valueOf(port),
-                            "--selenium-manager",
-                            "true",
-                            "--enable-managed-downloads",
-                            "true",
-                            "--log-level",
-                            "WARNING"
-                    });
-            return new URL("http://localhost:" + port);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static WebDriver getDriver() {
         if (driverThreadLocal.get() == null) {
             startDriver();
@@ -79,34 +58,44 @@ public class DriverFactory {
         try {
             if (isRemote) {
                 try {
-                    String remoteUrl = config.getProperty("remote.url");
+                    URL gridUrl = URI.create(System.getProperty("grid.url", "http://localhost:4444")).toURL();
+
                     switch (browser) {
                         case "chrome":
-                            ChromeOptions chromeOptions = new ChromeOptions();
+                            System.out.println(">>> TESTS");
+                            ChromeOptions remoteChromeOptions = new ChromeOptions();
                             if (isHeadless) {
-                                chromeOptions.addArguments("--headless=new", "--disable-gpu", "--window-size=1920,1080");
+                                remoteChromeOptions.addArguments("--headless=new", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=1920,1080");
                             }
-                            driver = new RemoteWebDriver(new URL(URI.create(remoteUrl).toASCIIString()), chromeOptions);
+                            driver = new RemoteWebDriver(gridUrl, remoteChromeOptions);
                             break;
+
                         case "firefox":
-                            FirefoxOptions firefoxOptions = new FirefoxOptions();
+                            FirefoxOptions remoteFirefoxOptions = new FirefoxOptions();
                             if (isHeadless) {
-                                firefoxOptions.addArguments("--headless", "--width=1920", "--height=1080");
+                                remoteFirefoxOptions.addArguments("--headless", "--width=1920", "--height=1080");
                             }
-                            driver = new RemoteWebDriver(new URL(URI.create(remoteUrl).toASCIIString()), firefoxOptions);
+                            driver = new RemoteWebDriver(gridUrl, remoteFirefoxOptions);
                             break;
+
                         case "edge":
-                            EdgeOptions edgeOptions = new EdgeOptions();
+                            EdgeOptions remoteEdgeOptions = new EdgeOptions();
                             if (isHeadless) {
-                                edgeOptions.addArguments("--headless=new", "--disable-gpu", "--window-size=1920,1080");
+                                remoteEdgeOptions.addArguments("--headless=new", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--window-size=1920,1080");
                             }
-                            driver = new RemoteWebDriver(new URL(URI.create(remoteUrl).toASCIIString()), edgeOptions);
+                            driver = new RemoteWebDriver(gridUrl, remoteEdgeOptions);
                             break;
+
                         default:
                             throw new IllegalArgumentException("Unsupported remote browser: " + browser);
                     }
+
                 } catch (MalformedURLException e) {
-                    throw new RuntimeException("Error creating RemoteWebDriver: " + e.getMessage());
+                    System.out.println("Invalid Grid URL: " + e.getMessage());
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println("Failed to initialize remote WebDriver: " + e.getMessage());
+                    e.printStackTrace();
                 }
             } else {
                 switch (browser) {
@@ -120,7 +109,6 @@ public class DriverFactory {
                                 "--remote-allow-origins=*"
                         );
                         if (isHeadless) {
-                            System.out.println(">>> Running Chrome in headless mode");
                             chromeOptions.addArguments("--headless=new", "--disable-gpu", "--window-size=1920,1080");
                         }
                         driver = new ChromeDriver(chromeOptions);
@@ -129,7 +117,6 @@ public class DriverFactory {
                         WebDriverManager.firefoxdriver().setup();
                         FirefoxOptions firefoxOptions = new FirefoxOptions();
                         if (isHeadless) {
-                            System.out.println(">>> Running Firefox in headless mode");
                             firefoxOptions.addArguments("--headless", "--width=1920", "--height=1080");
                         }
                         driver = new FirefoxDriver(firefoxOptions);
@@ -143,7 +130,6 @@ public class DriverFactory {
                                 "--disable-notifications"
                         );
                         if (isHeadless) {
-                            System.out.println(">>> Running Edge in headless mode");
                             edgeOptions.addArguments("--headless=new", "--disable-gpu", "--window-size=1920,1080");
                         }
                         driver = new EdgeDriver(edgeOptions);
@@ -153,7 +139,7 @@ public class DriverFactory {
                 }
             }
             driver.manage().window().maximize();
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             driverThreadLocal.set(driver);
         } catch (Exception e) {
             System.out.println("Error starting WebDriver: " + e.getMessage());

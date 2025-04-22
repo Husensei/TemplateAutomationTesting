@@ -17,9 +17,9 @@ import static driver.DriverFactory.*;
 public class Hooks {
     @Before
     public void setUp() {
-        System.out.println("Starting WebDriver...");
-        System.out.println(">>> Running tests using browser: " + System.getProperty("browser"));
         startDriver();
+        System.out.println(">>> Starting WebDriver - Browser: " + System.getProperty("browser") + " | Headless: " + System.getProperty("headless") + " | Remote: " + System.getProperty("remote"));
+
     }
 
     @After
@@ -42,7 +42,7 @@ public class Hooks {
             } catch (IOException e) {
                 System.out.println("Error capturing screenshot: " + e.getMessage());
             } finally {
-                System.out.println("Quitting WebDriver...");
+                System.out.println(">>> Quitting WebDriver");
                 quitDriver();
             }
         }
