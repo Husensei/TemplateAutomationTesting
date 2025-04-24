@@ -1,6 +1,13 @@
 plugins {
     id 'java'
-    id "io.qameta.allure" version "2.12.0"
+}
+
+wrapper {
+    gradleVersion = '8.7'
+}
+
+repositories {
+    mavenCentral()
 }
 
 group = 'dev.husensei'
@@ -8,10 +15,30 @@ version = '1.0-SNAPSHOT'
 
 def junitVersion = "5.12.1"
 def cucumberVersion = "7.21.1"
+def aspectJVersion = '1.9.23'
 def allureVersion = "2.29.1"
 
-repositories {
-    mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs.add('-parameters')
+    options.compilerArgs.add('-Xlint:deprecation')
+}
+
+configurations {
+    agent {
+        canBeResolved = true
+        canBeConsumed = true
+    }
+
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
 }
 
 dependencies {
@@ -45,6 +72,8 @@ dependencies {
     testImplementation 'org.json:json:20250107'
 
     // Reporting
+    agent "org.aspectj:aspectjweaver:$aspectJVersion"
+
     testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
     testImplementation 'io.qameta.allure:allure-cucumber7-jvm'
     testImplementation "io.qameta.allure:allure-junit-platform"
@@ -57,23 +86,19 @@ dependencies {
 
 test {
     useJUnitPlatform()
+
     testLogging {
         events "passed", "skipped", "failed"
     }
+
     systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
     systemProperty "browser", System.getProperty("browser")
     systemProperty "headless", System.getProperty("headless")
     systemProperty "remote", System.getProperty("remote")
     systemProperty "grid.url", System.getProperty("grid.url")
     systemProperty "env", System.getProperty("env", "dev")
-}
 
-configurations {
-    cucumberRuntime {
-        extendsFrom testImplementation
-    }
-}
+    ignoreFailures = true
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs << "-Xlint:deprecation"
+    jvmArgs = [ "-javaagent:${configurations.agent.singleFile}" ]
 }
