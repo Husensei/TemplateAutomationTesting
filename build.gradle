@@ -16,6 +16,7 @@ version = '1.0-SNAPSHOT'
 
 def junitVersion = "5.12.1"
 def cucumberVersion = "7.21.1"
+def seleniumVersion = "4.31.0"
 def aspectJVersion = '1.9.23'
 def allureVersion = "2.29.1"
 
@@ -57,12 +58,14 @@ dependencies {
     testImplementation 'org.junit.vintage:junit-vintage-engine'
 
     // Cucumber JUnit 5 support
-    testImplementation(platform("io.cucumber:cucumber-bom:$cucumberVersion"))
+    testImplementation platform("io.cucumber:cucumber-bom:$cucumberVersion")
     testImplementation 'io.cucumber:cucumber-java'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine'
 
     // Selenium
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.31.0'
+    testImplementation platform("org.seleniumhq.selenium:selenium-bom:$seleniumVersion")
+    testImplementation 'org.seleniumhq.selenium:selenium-java'
+    testImplementation 'org.seleniumhq.selenium:selenium-devtools-v135'
 
     // WebDriverManager
     testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.3'
@@ -83,6 +86,9 @@ dependencies {
     // Logging
     testImplementation 'ch.qos.logback:logback-classic:1.5.18'
     testImplementation 'org.slf4j:slf4j-api:2.0.17'
+
+    // BrowserMob Proxy
+    testImplementation 'net.lightbody.bmp:browsermob-core:2.1.5'
 }
 
 test {
