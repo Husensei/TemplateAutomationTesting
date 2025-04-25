@@ -1,18 +1,20 @@
 package pages.example;
 
 import driver.DriverFactory;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.SeleniumUtils;
 
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExampleLoginPage {
+public class HerokuLoginPage {
+
+    private final WebDriver driver;
 
     @FindBy(id = "username")
     private WebElement inputUsername;
@@ -29,8 +31,9 @@ public class ExampleLoginPage {
     @FindBy(xpath = "//div[@class='flash error']")
     private WebElement errorMessage;
 
-    public ExampleLoginPage() {
-        PageFactory.initElements(DriverFactory.getDriver(), this);
+    public HerokuLoginPage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
     }
 
     public void userIsOnTheLoginPage() {

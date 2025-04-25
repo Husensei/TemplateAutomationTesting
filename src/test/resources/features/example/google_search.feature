@@ -1,6 +1,7 @@
-@example
+@google
 Feature: Google Search
 
+  @parallel
   Scenario: User searches for Selenium on Google
     Given I am on the Google homepage
     When I search for "Selenium"

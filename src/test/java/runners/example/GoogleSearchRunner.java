@@ -1,4 +1,4 @@
-package runners;
+package runners.example;
 
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
@@ -11,7 +11,7 @@ import static io.cucumber.junit.platform.engine.Constants.*;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features/example") // ✅ relative to src/test/resources
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "steps, steps.example")
-@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@example")
+@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@google")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm")
-public class ExampleRunner {
+public class GoogleSearchRunner {
 }

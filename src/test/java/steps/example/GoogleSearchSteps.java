@@ -1,5 +1,6 @@
 package steps.example;
 
+import driver.DriverFactory;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -9,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GoogleSearchSteps {
 
-    GoogleSearchPage googleSearchPage;
+    private final GoogleSearchPage googleSearchPage;
 
     public GoogleSearchSteps() {
-        googleSearchPage = new GoogleSearchPage();
+        this.googleSearchPage = new GoogleSearchPage(DriverFactory.getDriver());
     }
 
     @Given("I am on the Google homepage")

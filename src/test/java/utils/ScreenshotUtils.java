@@ -28,9 +28,10 @@ public class ScreenshotUtils {
             TakesScreenshot ts = (TakesScreenshot) driver;
             File source = ts.getScreenshotAs(OutputType.FILE);
 
-            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
+            String threadId = String.valueOf(Thread.currentThread().threadId());
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String safeScenarioName = scenarioName.replaceAll("[^a-zA-Z0-9]", "_");
-            String fileName = String.format("screenshot_%s_%s.png", safeScenarioName, timestamp);
+            String fileName = String.format("screenshot_%s_%s_%s.png", safeScenarioName, timestamp, threadId);
 
             File destination = new File(SCREENSHOT_DIR, fileName);
             FileUtils.copyFile(source, destination);
