@@ -5,6 +5,7 @@ plugins {
 
 wrapper {
     gradleVersion = '8.7'
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 repositories {
@@ -14,11 +15,14 @@ repositories {
 group = 'dev.husensei'
 version = '1.0-SNAPSHOT'
 
-def junitVersion = "5.12.1"
-def cucumberVersion = "7.21.1"
-def seleniumVersion = "4.31.0"
-def aspectJVersion = '1.9.23'
-def allureVersion = "2.29.1"
+ext {
+    junitVersion = "5.12.1"
+    cucumberVersion = "7.21.1"
+    seleniumVersion = "4.32.0"
+    restAssuredVersion = "5.5.1"
+    aspectJVersion = "1.9.23"
+    allureVersion = "2.29.1"
+}
 
 java {
     toolchain {
@@ -46,15 +50,9 @@ configurations {
 dependencies {
     // ✅ Use BOM to align JUnit Platform modules
     testImplementation platform("org.junit:junit-bom:$junitVersion")
-
-    // JUnit Jupiter
     testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    // JUnit Platform
     testImplementation 'org.junit.platform:junit-platform-suite'
     testImplementation 'org.junit.platform:junit-platform-launcher'
-
-    // JUnit Vintage
     testImplementation 'org.junit.vintage:junit-vintage-engine'
 
     // Cucumber JUnit 5 support
@@ -71,8 +69,10 @@ dependencies {
     testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.3'
 
     // REST Assured & JSON
-    testImplementation 'io.rest-assured:rest-assured:5.5.1'
-    testImplementation 'io.rest-assured:json-path:5.5.1'
+    testImplementation platform("io.rest-assured:rest-assured-bom:$restAssuredVersion")
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.rest-assured:json-path'
+    testImplementation 'io.rest-assured:json-schema-validator'
     testImplementation 'org.json:json:20250107'
 
     // Reporting
@@ -98,11 +98,9 @@ test {
         events "passed", "skipped", "failed"
     }
 
-    systemProperty "cucumber.filter.tags", System.getProperty("cucumber.filter.tags")
-    systemProperty "browser", System.getProperty("browser")
-    systemProperty "headless", System.getProperty("headless")
-    systemProperty "remote", System.getProperty("remote")
-    systemProperty "grid.url", System.getProperty("grid.url")
+    systemProperties System.getProperties().findAll { key, _ ->
+        key in ["cucumber.filter.tags", "browser", "headless", "remote", "grid.url", "env"]
+    }
     systemProperty "env", System.getProperty("env", "dev")
 
     ignoreFailures = true

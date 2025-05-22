@@ -20,16 +20,34 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static driver.DriverFactory.*;
+import static org.apache.commons.compress.utils.ArchiveUtils.sanitize;
 import static utils.ScreenshotUtils.captureScreenshot;
 
+/**
+ * Cucumber Hooks for setting up and tearing down WebDriver sessions and browser logging.
+ * <p>
+ * This class initializes the driver and logging tools (CDP or BrowserMob Proxy) before each scenario,
+ * and handles log capturing, screenshot collection, and Allure report attachment after each scenario.
+ */
 public class Hooks {
 
     private static final Logger logger = LoggerUtils.getLogger(Hooks.class);
     private String sanitizedScenarioName;
+    private long startTime;
 
+    /**
+     * Cucumber {@code @Before} hook.
+     * <p>
+     * Initializes WebDriver, sanitizes the scenario name for log filenames, and enables logging
+     * based on the browser type. Also deletes any existing logs for the same scenario name.
+     *
+     * @param scenario the current Cucumber scenario
+     */
     @Before
     public void setUp(Scenario scenario) {
-        sanitizedScenarioName = scenario.getName().replaceAll("[^a-zA-Z0-9]", "_") + "_" + Thread.currentThread().threadId();
+        sanitizedScenarioName = sanitize(scenario.getName()) + "_" + Thread.currentThread().threadId();
+        cleanOldLogs(sanitizedScenarioName);
+        startTime = System.currentTimeMillis();
         startDriver();
 
         RemoteWebDriver driver = (RemoteWebDriver) getDriver();
@@ -42,36 +60,80 @@ public class Hooks {
         }
     }
 
+    /**
+     * Cucumber {@code @After} hook.
+     * <p>
+     * Captures browser logs, screenshots (if scenario failed), and attaches them to the Allure report.
+     * Ends the WebDriver session and logs the scenario duration.
+     *
+     * @param scenario the current Cucumber scenario
+     */
     @After
     public void tearDown(Scenario scenario) {
+        long duration = System.currentTimeMillis() - startTime;
+        logger.info("🕒 Scenario '{}' finished in {} ms", sanitizedScenarioName, duration);
+
         try {
             if (getDriver() != null) {
-                if (scenario.isFailed()) {
-                    captureScreenshot(getDriver(), scenario.getName());
-                }
-
                 RemoteWebDriver driver = (RemoteWebDriver) getDriver();
                 String browserName = driver.getCapabilities().getBrowserName();
+
+                if (scenario.isFailed()) {
+                    captureScreenshot(driver, scenario.getName());
+                }
 
                 if (browserName.equalsIgnoreCase("firefox") || browserName.equalsIgnoreCase("safari")) {
                     BrowserLogUtils.saveProxyHar(sanitizedScenarioName);
                 }
 
-                String consoleLogPath = Paths.get("target", "logs", "console", sanitizedScenarioName + ".log").toString();
-                String networkLogPath = Paths.get("target", "logs", "network", sanitizedScenarioName + ".log").toString();
-                String harPath = Paths.get("target", "logs", "network", sanitizedScenarioName + ".har").toString();
-
-                FileManager.attachFileToAllure(consoleLogPath, "Console Logs");
-                FileManager.attachFileToAllure(networkLogPath, "Network Logs");
-
-                if (new File(harPath).exists()) {
-                    FileManager.attachFileToAllure(harPath, "HAR File");
-                } else {
-                    logger.info("HAR file not found for scenario: " + sanitizedScenarioName);
-                }
+                // Attach logs if present
+                attachLogIfExists("console", sanitizedScenarioName + ".log", "Console Logs");
+                attachLogIfExists("network", sanitizedScenarioName + ".log", "Network Logs");
+                attachLogIfExists("network", sanitizedScenarioName + ".har", "HAR File");
             }
         } finally {
             quitDriver();
+        }
+    }
+
+    /**
+     * Deletes old log files (if any) for the given scenario name to avoid mixing logs from past runs.
+     *
+     * @param scenarioName the sanitized scenario name
+     */
+    private void cleanOldLogs(String scenarioName) {
+        String[] types = {"console", "network"};
+        for (String type : types) {
+            deleteIfExists(Paths.get("target", "logs", type, scenarioName + ".log").toFile());
+            deleteIfExists(Paths.get("target", "logs", type, scenarioName + ".har").toFile());
+        }
+    }
+
+    /**
+     * Deletes a file if it exists.
+     *
+     * @param file the file to be deleted
+     */
+    private void deleteIfExists(File file) {
+        if (file.exists() && file.delete()) {
+            logger.debug("🧹 Deleted old log: {}", file.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Attaches a log file to the Allure report if it exists.
+     *
+     * @param type     the type of log (e.g., "console", "network")
+     * @param filename the log file name
+     * @param label    the label to display in the Allure report
+     */
+    private void attachLogIfExists(String type, String filename, String label) {
+        String path = Paths.get("target", "logs", type, filename).toString();
+        File file = new File(path);
+        if (file.exists()) {
+            FileManager.attachFileToAllure(path, label);
+        } else {
+            logger.info("📁 No {} found for scenario: {}", label, sanitizedScenarioName);
         }
     }
 }
