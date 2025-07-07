@@ -16,11 +16,11 @@ group = 'dev.husensei'
 version = '1.0-SNAPSHOT'
 
 ext {
-    junitVersion = "5.12.1"
-    cucumberVersion = "7.21.1"
-    seleniumVersion = "4.32.0"
-    restAssuredVersion = "5.5.1"
-    aspectJVersion = "1.9.23"
+    junitVersion = "5.13.3"
+    cucumberVersion = "7.23.0"
+    seleniumVersion = "4.34.0"
+    restAssuredVersion = "5.5.5"
+    aspectJVersion = "1.9.24"
     allureVersion = "2.29.1"
 }
 
@@ -63,7 +63,7 @@ dependencies {
     // Selenium
     testImplementation platform("org.seleniumhq.selenium:selenium-bom:$seleniumVersion")
     testImplementation 'org.seleniumhq.selenium:selenium-java'
-    testImplementation 'org.seleniumhq.selenium:selenium-devtools-v135'
+    testImplementation 'org.seleniumhq.selenium:selenium-devtools-v138'
 
     // WebDriverManager
     testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.3'

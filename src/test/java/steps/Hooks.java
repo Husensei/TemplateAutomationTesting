@@ -34,6 +34,7 @@ public class Hooks {
     private static final Logger logger = LoggerUtils.getLogger(Hooks.class);
     private String sanitizedScenarioName;
     private long startTime;
+    private static final String LOG_DIR = "target/logs";
 
     /**
      * Cucumber {@code @Before} hook.
@@ -104,8 +105,8 @@ public class Hooks {
     private void cleanOldLogs(String scenarioName) {
         String[] types = {"console", "network"};
         for (String type : types) {
-            deleteIfExists(Paths.get("target", "logs", type, scenarioName + ".log").toFile());
-            deleteIfExists(Paths.get("target", "logs", type, scenarioName + ".har").toFile());
+            deleteIfExists(Paths.get(LOG_DIR, type, scenarioName + ".log").toFile());
+            deleteIfExists(Paths.get(LOG_DIR, type, scenarioName + ".har").toFile());
         }
     }
 
@@ -128,7 +129,7 @@ public class Hooks {
      * @param label    the label to display in the Allure report
      */
     private void attachLogIfExists(String type, String filename, String label) {
-        String path = Paths.get("target", "logs", type, filename).toString();
+        String path = Paths.get(LOG_DIR, type, filename).toString();
         File file = new File(path);
         if (file.exists()) {
             FileManager.attachFileToAllure(path, label);

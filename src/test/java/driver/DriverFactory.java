@@ -2,6 +2,7 @@ package driver;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import utils.EnvironmentManager;
 import utils.LoggerUtils;
@@ -27,29 +28,27 @@ import java.util.Map;
 public class DriverFactory {
 
     private static final Logger logger = LoggerUtils.getLogger(DriverFactory.class);
-    private static final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
 
     /**
-     * Returns the current thread's WebDriver instance.
-     * If no instance exists, it initializes a new one using {@link #startDriver()}.
-     *
-     * @return the WebDriver instance for the current thread
+     * ThreadLocal driver that automatically initializes using createDriver on first access.
+     */
+    private static final ThreadLocal<WebDriver> driverThreadLocal = ThreadLocal.withInitial(() -> {
+        WebDriver driver = createDriver();
+        logger.info("✅ WebDriver initialized automatically for thread: {}", Thread.currentThread().getName());
+        return driver;
+    });
+
+    /**
+     * Returns the WebDriver for the current thread.
      */
     public static WebDriver getDriver() {
-        if (driverThreadLocal.get() == null) {
-            startDriver();
-        }
         return driverThreadLocal.get();
     }
 
     /**
-     * Initializes and starts a WebDriver instance based on environment configurations.
-     * Supports local or remote execution, headless mode, and custom capabilities.
-     * The created WebDriver is stored in a ThreadLocal for thread-safe access.
-     *
-     * @throws RuntimeException if WebDriver fails to initialize
+     * Builds a new WebDriver instance based on environment settings.
      */
-    public static void startDriver() {
+    public static WebDriver createDriver() {
         final String browserName = EnvironmentManager.get("browser", "chrome");
         final boolean isHeadless = Boolean.parseBoolean(EnvironmentManager.get("headless", "false"));
         final boolean isRemote = Boolean.parseBoolean(EnvironmentManager.get("remote", "false"));
@@ -57,10 +56,7 @@ public class DriverFactory {
         final long implicitWaitSeconds = Long.parseLong(EnvironmentManager.get("implicit.wait", "10"));
 
         Map<String, Object> additionalCapabilities = new HashMap<>();
-//         ===== EXAMPLE ADDITIONAL CAPABILITIES =====
-//         if (Boolean.parseBoolean(EnvironmentManager.get("acceptInsecureCerts", "true"))) {
-//            additionalCapabilities.put("acceptInsecureCerts", true);
-//        }
+        // additionalCapabilities.put("acceptInsecureCerts", true);
 
         try {
             BrowserType browser = BrowserType.fromString(browserName);
@@ -68,11 +64,13 @@ public class DriverFactory {
             driver.manage().window().maximize();
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds((implicitWaitSeconds)));
             logger.info("✅ WebDriver started successfully.");
-            driverThreadLocal.set(driver);
+            return driver;
         } catch (MalformedURLException e) {
             logger.error("⚠️ Invalid grid URL: {}", e.getMessage(), e);
+            throw new RuntimeException("Invalid Selenium Grid URL", e);
         } catch (WebDriverException e) {
             logger.error("⚠️ WebDriver error occurred: {}", e.getMessage(), e);
+            throw new RuntimeException("WebDriver error", e);
         } catch (Exception e) {
             logger.error("❌ Unexpected error while starting WebDriver: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to initialize WebDriver", e);
@@ -80,20 +78,41 @@ public class DriverFactory {
     }
 
     /**
-     * Quits the current thread's WebDriver instance and removes it from the ThreadLocal store.
-     * Ensures that browser sessions are properly closed and resources are freed.
+     * Explicitly start a new driver and override the current ThreadLocal.
+     * Useful if you want to restart in the same thread.
+     */
+    public static void startDriver() {
+        WebDriver driver = createDriver();
+        driverThreadLocal.set(driver);
+        logger.info("✅ WebDriver manually started for thread: {}", Thread.currentThread().getName());
+    }
+
+    /**
+     * Quits the current WebDriver instance and removes it from ThreadLocal.
      */
     public static void quitDriver() {
         WebDriver driver = driverThreadLocal.get();
         if (driver != null) {
             try {
-                driver.quit();
-                logger.info("🛑 WebDriver quit successfully");
+                if (driver instanceof RemoteWebDriver && ((RemoteWebDriver) driver).getSessionId() == null) {
+                    logger.warn("Session already closed.");
+                } else {
+                    driver.quit();
+                    logger.info("🛑 WebDriver quit successfully for thread: {}", Thread.currentThread().getName());
+                }
             } catch (Exception e) {
                 logger.error("⚠️ Error quitting WebDriver: {}", e.getMessage(), e);
             } finally {
                 driverThreadLocal.remove();
             }
         }
+    }
+
+    /**
+     * Resets the WebDriver by quitting current and starting a new one.
+     */
+    public static void resetDriver() {
+        quitDriver();
+        startDriver();
     }
 }

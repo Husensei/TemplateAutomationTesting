@@ -5,8 +5,8 @@ import net.lightbody.bmp.BrowserMobProxyServer;
 import net.lightbody.bmp.core.har.Har;
 import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.v135.log.Log;
-import org.openqa.selenium.devtools.v135.network.Network;
+import org.openqa.selenium.devtools.v138.log.Log;
+import org.openqa.selenium.devtools.v138.network.Network;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 
@@ -46,7 +46,12 @@ public class BrowserLogUtils {
                 devTools.set(tools);
 
                 tools.send(Log.enable());
-                tools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
+                tools.send(Network.enable(
+                        Optional.<Integer>empty(),
+                        Optional.<Integer>empty(),
+                        Optional.<Integer>empty(),
+                        Optional.<Boolean>empty()
+                ));
 
                 tools.addListener(Log.entryAdded(), logEntry ->
                         saveToFile("console", scenarioName, logEntry.getText())
