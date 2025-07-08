@@ -4,8 +4,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.EnvironmentManager;
-import utils.LoggerUtils;
 
 import java.net.MalformedURLException;
 import java.time.Duration;
@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class DriverFactory {
 
-    private static final Logger logger = LoggerUtils.getLogger(DriverFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(DriverFactory.class);
 
     /**
      * ThreadLocal driver that automatically initializes using createDriver on first access.

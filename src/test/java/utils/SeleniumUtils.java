@@ -11,17 +11,14 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 
 /**
- * Utility class providing common Selenium WebDriver wait operations.
+ * Utility class providing common Selenium WebDriver explicit waits.
  * <p>
- * The default wait timeout can be configured via the environment property
- * {@code wait.time.seconds}. If not set or invalid, it defaults to 10 seconds.
- * <p>
- * This class provides explicit wait methods for various common conditions such as
- * element visibility, clickability, presence, URL, text presence, and title checks.
+ * Configurable default wait timeout via "wait.time.seconds" environment property.
+ * Falls back to 10 seconds if not set.
  */
 public class SeleniumUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(SeleniumUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(SeleniumUtils.class);
     private static final int WAIT_TIME_SECONDS;
 
     static {
@@ -30,11 +27,11 @@ public class SeleniumUtils {
         try {
             waitTime = Integer.parseInt(waitTimeStr);
         } catch (NumberFormatException e) {
-            log.warn("⚠️ Invalid wait.time.seconds '{}', falling back to 10 seconds", waitTimeStr);
+            logger.warn("⚠️ Invalid wait.time.seconds '{}', falling back to 10 seconds", waitTimeStr);
             waitTime = 10;
         }
         WAIT_TIME_SECONDS = waitTime;
-        log.info("⏱️ SeleniumUtils wait time set to {} seconds", WAIT_TIME_SECONDS);
+        logger.info("⏱️ SeleniumUtils wait time set to {} seconds", WAIT_TIME_SECONDS);
     }
 
     /**
@@ -47,99 +44,90 @@ public class SeleniumUtils {
         return new WebDriverWait(driver, Duration.ofSeconds(WAIT_TIME_SECONDS));
     }
 
+    private static WebDriverWait createWait(WebDriver driver, int timeoutInSeconds) {
+        return new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
+    }
+
     /**
-     * Waits until the specified WebElement is visible on the page.
-     *
-     * @param driver  the WebDriver instance
-     * @param element the WebElement to wait for visibility
-     * @return the visible WebElement, or {@code null} if timeout or error occurs
+     * Waits until element located by the locator is visible.
      */
-    public static WebElement waitForElementToBeVisible(WebDriver driver, WebElement element) {
+    public static WebElement waitForElementToBeVisible(WebDriver driver, By locator) {
+        return waitForElementToBeVisible(driver, locator, WAIT_TIME_SECONDS);
+    }
+
+    public static WebElement waitForElementToBeVisible(WebDriver driver, By locator, int timeoutInSeconds) {
         try {
-            return createWait(driver).until(ExpectedConditions.visibilityOf(element));
+            return createWait(driver, timeoutInSeconds).until(ExpectedConditions.visibilityOfElementLocated(locator));
         } catch (Exception e) {
-            log.error("❌ Error waiting for element to be visible: {} on page: {}", element, driver.getCurrentUrl(), e);
+            logger.error("❌ Timeout waiting for element to be visible: {} on page: {}", locator, driver.getCurrentUrl(), e);
             return null;
         }
     }
 
     /**
-     * Waits until the specified WebElement is clickable.
-     *
-     * @param driver  the WebDriver instance
-     * @param element the WebElement to wait for clickability
-     * @return the clickable WebElement, or {@code null} if timeout or error occurs
+     * Waits until element located by the locator is clickable.
      */
-    public static WebElement waitForElementToBeClickable(WebDriver driver, WebElement element) {
+    public static WebElement waitForElementToBeClickable(WebDriver driver, By locator) {
+        return waitForElementToBeClickable(driver, locator, WAIT_TIME_SECONDS);
+    }
+
+    public static WebElement waitForElementToBeClickable(WebDriver driver, By locator, int timeoutInSeconds) {
         try {
-            return createWait(driver).until(ExpectedConditions.elementToBeClickable(element));
+            return createWait(driver, timeoutInSeconds).until(ExpectedConditions.elementToBeClickable(locator));
         } catch (Exception e) {
-            log.error("❌ Error waiting for element to be clickable: {} on page: {}", element, driver.getCurrentUrl(), e);
+            logger.error("❌ Timeout waiting for element to be clickable: {} on page: {}", locator, driver.getCurrentUrl(), e);
             return null;
         }
     }
 
     /**
-     * Waits until the current URL matches the specified URL.
-     *
-     * @param driver the WebDriver instance
-     * @param url    the URL to wait for
-     * @return {@code true} if URL matches within timeout, {@code null} if error occurs
+     * Waits until the current URL matches expected.
      */
-    public static Boolean waitForUrlToBe(WebDriver driver, String url) {
+    public static boolean waitForUrlToBe(WebDriver driver, String url) {
         try {
             return createWait(driver).until(ExpectedConditions.urlToBe(url));
         } catch (Exception e) {
-            log.error("❌ Error waiting for URL to be '{}'. Current URL: {}", url, driver.getCurrentUrl(), e);
-            return null;
-        }
-    }
-
-    /**
-     * Waits until an element located by the specified locator is present in the DOM.
-     *
-     * @param driver  the WebDriver instance
-     * @param locator the locator to find the element
-     * @return the found WebElement, or {@code null} if timeout or error occurs
-     */
-    public static WebElement waitForElementPresence(WebDriver driver, By locator) {
-        try {
-            return createWait(driver).until(ExpectedConditions.presenceOfElementLocated(locator));
-        } catch (Exception e) {
-            log.error("❌ Error waiting for presence of element: {}", locator, e);
-            return null;
-        }
-    }
-
-    /**
-     * Waits until the specified text is present in the given WebElement.
-     *
-     * @param driver  the WebDriver instance
-     * @param element the WebElement to check text presence
-     * @param text    the text to wait for
-     * @return {@code true} if text is present within timeout, {@code false} otherwise
-     */
-    public static boolean waitForTextToBePresent(WebDriver driver, WebElement element, String text) {
-        try {
-            return createWait(driver).until(ExpectedConditions.textToBePresentInElement(element, text));
-        } catch (Exception e) {
-            log.error("❌ Error waiting for text '{}' to be present in element: {}", text, element, e);
+            logger.error("❌ Timeout waiting for URL to be '{}'. Current URL: {}", url, driver.getCurrentUrl(), e);
             return false;
         }
     }
 
     /**
-     * Waits until the page title contains the specified text.
-     *
-     * @param driver the WebDriver instance
-     * @param title  the text expected to be contained in the page title
-     * @return {@code true} if title contains the text within timeout, {@code false} otherwise
+     * Waits until presence in the DOM.
+     */
+    public static WebElement waitForElementPresence(WebDriver driver, By locator) {
+        try {
+            return createWait(driver).until(ExpectedConditions.presenceOfElementLocated(locator));
+        } catch (Exception e) {
+            logger.error("❌ Timeout waiting for presence of element: {}", locator, e);
+            return null;
+        }
+    }
+
+    /**
+     * Waits until text is present in the specified element.
+     */
+    public static boolean waitForTextToBePresent(WebDriver driver, WebElement element, String text) {
+        if (element == null) {
+            logger.warn("⚠️ Provided element is null. Cannot wait for text '{}'", text);
+            return false;
+        }
+        try {
+            return createWait(driver).until(ExpectedConditions.textToBePresentInElement(element, text));
+        } catch (Exception e) {
+            logger.error("❌ Timeout waiting for text '{}' to be present in element: {}", text, element, e);
+            return false;
+        }
+    }
+
+    /**
+     * Waits until the title contains expected text.
      */
     public static boolean waitForTitleToContain(WebDriver driver, String title) {
         try {
             return createWait(driver).until(ExpectedConditions.titleContains(title));
         } catch (Exception e) {
-            log.error("❌ Error waiting for title to contain '{}'", title, e);
+            logger.error("❌ Timeout waiting for title to contain '{}'", title, e);
             return false;
         }
     }

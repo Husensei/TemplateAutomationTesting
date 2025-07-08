@@ -1,13 +1,14 @@
 package utils;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for configuration-related helpers.
  */
 public class ConfigUtils {
 
-    private static final Logger logger = LoggerUtils.getLogger(ConfigUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigUtils.class);
     /**
      * Parses a window size string (e.g., "1920,1080") into an integer array.
      *

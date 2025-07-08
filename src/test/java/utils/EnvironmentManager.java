@@ -1,6 +1,7 @@
 package utils;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -20,7 +21,7 @@ import java.util.Properties;
  */
 public class EnvironmentManager {
 
-    private static final Logger logger = LoggerUtils.getLogger(EnvironmentManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(EnvironmentManager.class);
     private static final Properties properties = new Properties();
 
     static {

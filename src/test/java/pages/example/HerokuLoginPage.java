@@ -1,6 +1,7 @@
 package pages.example;
 
 import driver.DriverFactory;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -15,52 +16,41 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class HerokuLoginPage {
 
     private final WebDriver driver;
-
-    @FindBy(id = "username")
-    private WebElement inputUsername;
-
-    @FindBy(id = "password")
-    private WebElement inputPassword;
-
-    @FindBy(xpath = "//button[contains(.,'Login')]")
-    private WebElement loginButton;
-
-    @FindBy(xpath = "//div[@class='flash success']")
-    private WebElement successMessage;
-
-    @FindBy(xpath = "//div[@class='flash error']")
-    private WebElement errorMessage;
+    private final By inputUsername = By.id("username");
+    private final By inputPassword = By.id("password");
+    private final By loginButton = By.xpath("//button[contains(.,'Login')]");
+    private final By successMessage = By.xpath("//div[@class='flash success']");
+    private final By errorMessage = By.xpath("//div[@class='flash error']");
 
     public HerokuLoginPage(WebDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(driver, this);
     }
 
     public void userIsOnTheLoginPage() {
-        DriverFactory.getDriver().get("https://the-internet.herokuapp.com/login");
+        driver.get("https://the-internet.herokuapp.com/login");
     }
 
     public void enterUsername(String username) {
-        inputUsername.clear();
-        inputUsername.sendKeys(username);
+        driver.findElement(inputUsername).clear();
+        driver.findElement(inputUsername).sendKeys(username);
     }
 
     public void enterPassword(String password) {
-        inputPassword.clear();
-        inputPassword.sendKeys(password);
+        driver.findElement(inputPassword).clear();
+        driver.findElement(inputPassword).sendKeys(password);
     }
 
     public void clickLoginButton() {
-        loginButton.click();
+        driver.findElement(loginButton).click();
     }
 
     public boolean isSecureAreaVisible() {
-        return successMessage.isDisplayed();
+        return driver.findElement(successMessage).isDisplayed();
     }
 
     public boolean isErrorMessageVisible() {
-        WebDriverWait wait = new WebDriverWait(DriverFactory.getDriver(), Duration.ofSeconds(5));
-        wait.until(ExpectedConditions.visibilityOf(errorMessage));
-        return errorMessage.isDisplayed();
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.visibilityOfElementLocated(errorMessage));
+        return driver.findElement(errorMessage).isDisplayed();
     }
 }

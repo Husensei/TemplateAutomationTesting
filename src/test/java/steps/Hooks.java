@@ -8,10 +8,10 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.BrowserLogUtils;
 import utils.EnvironmentManager;
 import utils.FileManager;
-import utils.LoggerUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import static utils.ScreenshotUtils.captureScreenshot;
  */
 public class Hooks {
 
-    private static final Logger logger = LoggerUtils.getLogger(Hooks.class);
+    private static final Logger logger = LoggerFactory.getLogger(Hooks.class);
     private String sanitizedScenarioName;
     private long startTime;
     private static final String LOG_DIR = "target/logs";

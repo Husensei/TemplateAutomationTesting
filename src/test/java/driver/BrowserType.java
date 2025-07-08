@@ -13,7 +13,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import org.slf4j.Logger;
-import utils.LoggerUtils;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -157,7 +157,7 @@ public enum BrowserType {
         }
     };
 
-    private static final Logger logger = LoggerUtils.getLogger(BrowserType.class);
+    private static final Logger logger = LoggerFactory.getLogger(BrowserType.class);
 
     /**
      * Returns the browser-specific capabilities with optional headless and custom capabilities.

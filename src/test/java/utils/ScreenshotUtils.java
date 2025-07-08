@@ -6,6 +6,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.Date;
  */
 public class ScreenshotUtils {
 
-    private static final Logger logger = LoggerUtils.getLogger(ScreenshotUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScreenshotUtils.class);
     private static final String SCREENSHOT_DIR = EnvironmentManager.get("screenshot.dir", "target/screenshots/");
 
     /**
@@ -36,13 +37,12 @@ public class ScreenshotUtils {
      * @param scenarioName the name of the current test scenario, used in the screenshot filename and Allure attachment
      */
     public static void captureScreenshot(WebDriver driver, String scenarioName) {
-        if (!(driver instanceof TakesScreenshot)) {
+        if (!(driver instanceof TakesScreenshot ts)) {
             logger.warn("❌ Driver does not support taking screenshots.");
             return;
         }
 
         try {
-            TakesScreenshot ts = (TakesScreenshot) driver;
             File source = ts.getScreenshotAs(OutputType.FILE);
 
             String threadId = String.valueOf(Thread.currentThread().threadId());

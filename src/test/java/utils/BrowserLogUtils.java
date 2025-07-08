@@ -9,6 +9,7 @@ import org.openqa.selenium.devtools.v138.log.Log;
 import org.openqa.selenium.devtools.v138.network.Network;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,7 +26,7 @@ import java.util.Optional;
  */
 public class BrowserLogUtils {
 
-    private static final Logger logger = LoggerUtils.getLogger(BrowserLogUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(BrowserLogUtils.class);
     private static final ThreadLocal<DevTools> devTools = new ThreadLocal<>();
     private static final ThreadLocal<BrowserMobProxy> proxyThread = new ThreadLocal<>();
 
